@@ -2,14 +2,15 @@ from keras.models import Sequential, load_model
 from keras.preprocessing.image import load_img, img_to_array
 from keras.layers import Dense, Dropout, Flatten, BatchNormalization, Activation
 from keras.layers.convolutional import Conv2D, MaxPooling2D
-from keras.utils import np_utils
+from keras.optimizers import SGD
+
 import numpy as np
 from pandas import read_csv
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder, LabelBinarizer
-from sklearn.compose import ColumnTransformer
 from sklearn.metrics import accuracy_score
 import matplotlib.pyplot as plt
+
 
 trainer = read_csv("C:/Users/Michael Huang/Documents/GitHub/SignML/sign_mnist_train/sign_mnist_train.csv")
 labels = trainer["label"].values
@@ -44,25 +45,26 @@ def defineModel():
     model.add(Conv2D(64, (3, 3), input_shape=(x_test.shape[1:]), activation='relu', padding='same'))
     model.add(Dropout(0.2))
     model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(BatchNormalization())
+    #model.add(BatchNormalization())
 
     model.add(Conv2D(64, (3, 3), activation='relu',padding='same'))
     model.add(Dropout(0.2))
     model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(BatchNormalization())
+    #model.add(BatchNormalization())
 
-    model.add(Conv2D(64, (3, 3), activation='relu',padding='same'))
-    model.add(Dropout(0.2))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(BatchNormalization())
+   # model.add(Conv2D(64, (3, 3), activation='relu',padding='same'))
+   # model.add(Dropout(0.2))
+   # model.add(MaxPooling2D(pool_size=(2, 2)))
+    #model.add(BatchNormalization())
 
     model.add(Flatten())
-    model.add(Dense(128, activation='relu'))
+    model.add(Dense(64, activation='relu'))
     model.add(Dropout(0.2))
 
     model.add(Dense(y_train.shape[1], activation='softmax'))
 
-    model.compile(optimizer='adam', loss="categorical_crossentropy", metrics=["accuracy"])
+    opt = SGD(lr=0.001, momentum=0.9)
+    model.compile(optimizer=opt, loss="categorical_crossentropy", metrics=["accuracy"])
     return model
 
 
@@ -89,10 +91,11 @@ if __name__ == "__main__":
    
     #model = defineModel()
     model = load_model("my_model.hl5")
-    img = load_img("C:/Users/Michael Huang/Documents/GitHub/SignML/C2.png", target_size=(28, 28))
+    img = load_img("C:/Users/Michael Huang/Documents/GitHub/SignML/A2.png", color_mode="grayscale", target_size=(28, 28))
     img = img_to_array(img)
-    #img = np.reshape(img, (28, 28, 1))
-    #img = img/255.0
+    img = img.flatten()
+    img = np.reshape(img, (28, 28))
+    img = img/255.0
     plt.imshow(img)
     plt.show()
     #test = model.predict_classes(img)
@@ -109,11 +112,11 @@ if __name__ == "__main__":
     #test = model.predict(img).round()
     #print((test))
     #print("Just a new line")
-    #model.fit(x_train, y_train, validation_data = (x_test, y_test), epochs=50, verbose=1)
-    #testStuff, testlabels = preProcessing(tester, testlabels)
-    #testStuff = testStuff.reshape(testStuff.shape[0], 28, 28, 1)
-    #y_pred = model.predict(testStuff).round()
-    #print(accuracy_score(testlabels, y_pred))
+    #model.fit(x_train, y_train, validation_data = (x_test, y_test), epochs=50, verbose=1, batch_size=128)
+    testStuff, testlabels = preProcessing(tester, testlabels)
+    testStuff = testStuff.reshape(testStuff.shape[0], 28, 28, 1)
+    y_pred = model.predict(testStuff).round()
+    print(accuracy_score(testlabels, y_pred))
     #score = accuracy_score()
    # model.save("my_model.hl5")
 
