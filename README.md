@@ -16,7 +16,7 @@ trainer = read_csv("C:/Users/Michael Huang/Documents/GitHub/SignML/sign_mnist_tr
 #tester = read_csv("C:/Users/Michael Huang/Documents/GitHub/SignML/sign_mnist_test/sign_mnist_test.csv")
 
 print(trainer.head())
-<pre></code>
+</pre></code>
 
 Some familiar imports. The first 3 are some things I'm more than likely going to use. That said, the new one is pandas. Kaggle gave us CSV files, it's only natural that we want to read said CSV files. The head prints out the literal information of the CSV file. Honestly, Pandas Dataframes are just interesting, and also something I'm first experiencing, so let's see how this goes. 
 some decent baseline, let's try to finish preprocessing tomorrow.
@@ -141,6 +141,24 @@ print(score)
 </pre></code>
 
 This simply trains the model. We should save the model, then test on random images found on the internet. 
+
+<h1>Day (totally 3)</h1>
+Well well well! Turns out I wasn't doing this right. I ran some predictions, and well, it was DEFINITELY not right, I mean I legitimately took 20 images and got the same value each time. So this means that the evaluation and accuracy must be very, very wrong. I believe this is due to overfitting. 
+<img src="C2.png">
+Our model returns 3 different classes, each correlating to a different prediction. You would think this would, probably, give us whatever correlates to C. It does NOT, like, REALLY DOES NOT. So why is this? Could it be overfitting? That's always a problem, but it turns out it's right here. 
+<pre><code>
+img = load_img("C:/Users/Michael Huang/Documents/GitHub/SignML/Ctrue.png", target_size=(28, 28))
+img = img_to_array(img)
+#img = np.reshape(img, (28, 28, 1))
+#img = img/255.0
+plt.imshow(img)
+plt.show()
+</pre></code>
+
+Feel free to run that plt.show() code, our magical sign turns into this
+<img src="Plot.PNG">
+Literally a blank screen, I mean LITERALLY a blank screen, how the heck should I expect my model to solve that? Tomorrow's woes, tomorrow's woes.
+
 
 Sources:
 https://towardsdatascience.com/train-test-split-and-cross-validation-in-python-80b61beca4b6
