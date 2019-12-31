@@ -12,12 +12,13 @@ from sklearn.metrics import accuracy_score
 import matplotlib.pyplot as plt
 
 
-trainer = read_csv("C:/Users/Huang/Documents/GitHub/SignML/sign_mnist_train/sign_mnist_train.csv")
+
+trainer = read_csv("C:/Users/Michael Huang/Documents/GitHub/SignML/sign_mnist_train/sign_mnist_train.csv")
 labels = trainer["label"].values
 trainer = trainer.drop(["label"], axis=1) #
 
 
-tester = read_csv("C:/Users/Huang/Documents/GitHub/SignML/sign_mnist_test/sign_mnist_test.csv")
+tester = read_csv("C:/Users/Michael Huang/Documents/GitHub/SignML/sign_mnist_test/sign_mnist_test.csv")
 testlabels = tester["label"].values
 tester = tester.drop(["label"], axis=1)
 
@@ -71,10 +72,44 @@ def defineModel():
     return model
 
 
-#def trainModel(model):
+def summarize_diagnostics(history):
+	# plot loss
+	plt.subplot(211)
+	plt.title('Cross Entropy Loss')
+	plt.plot(history.history['loss'], color='blue', label='train')
+	plt.plot(history.history['val_loss'], color='orange', label='test')
+	# plot accuracy
+	plt.subplot(212)
+	plt.title('Classification Accuracy')
+	plt.plot(history.history['categorical_accuracy'], color='blue', label='train')
+	plt.plot(history.history['val_categorical_accuracy'], color='orange', label='test')
+	# save plot to file
+	filename = sys.argv[0].split('/')[-1]
+	plt.savefig(filename + '_plot.png')
+	plt.close()
 
 
-    #return model
+def testModel():
+    model = load_model("my_model.hl5")
+    #folder = "C:/Users/Michael Huang/Documents/GitHub/SignML/"
+    #pic = input("Give me the extension:")
+    img = load_img("C:/Users/Michael Huang/Documents/GitHub/SignML/TestC.jpg", color_mode="grayscale", target_size=(28, 28))
+    img = img_to_array(img)
+    #img = img.flatten()
+    #img = np.reshape(img, (-1, 28, 28, 1))
+    #img = np.reshape(img, (28, 28))
+    img = img/255.0
+    #plt.imshow(img)
+    #plt.show()
+
+    #test = model.predict_classes(img)
+    #print(test)
+    #for i in range(3):
+    #test_test = model.predict_proba(img)
+    #test_test = "%.2f" % (test_test[test]*100)
+    #print(test_test)
+    
+
 
 if __name__ == "__main__": 
     data, labels = preProcessing(trainer, labels)
@@ -92,37 +127,15 @@ if __name__ == "__main__":
 
 
    
-   # model = defineModel()
-    model = load_model("my_model.hl5")
+    model = defineModel()
     
-    img = load_img("C:/Users/Huang/Documents/GitHub/SignML/TestC.jpg", color_mode="grayscale", target_size=(28, 28))
-    img = img_to_array(img)
-    img = img.flatten()
-    #img = np.reshape(img, (-1, 28, 28, 1))
-    img = np.reshape(img, (28, 28))
-    #img = img/255.0
-    plt.imshow(img)
-    plt.show()
+    history =  model.fit(x_train, y_train, validation_data = (x_test, y_test), epochs=40, verbose=1, batch_size=128)
+    summarize_diagnostics(history)
 
-    #test = model.predict_classes(img)
-    #print(test)
-    #for i in range(3):
-    #test_test = model.predict_proba(img)
-    #test_test = "%.2f" % (test_test[test]*100)
-    #print(test_test)
-    
-    #img = load_img("C:/Users/Michael Huang/Documents/GitHub/SignML/TestC.jpg", target_size=(28, 28))
-    #img = img_to_array(img)
-    #img = np.reshape(img, (-1, 28, 28, 1))
-
-    #test = model.predict(img).round()
-    #print((test))
-    #print("Just a new line")
-   # model.fit(x_train, y_train, validation_data = (x_test, y_test), epochs=40, verbose=1, batch_size=128)
    # testStuff, testlabels = preProcessing(tester, testlabels)
    # testStuff = testStuff.reshape(testStuff.shape[0], 28, 28, 1)
     #y_pred = model.predict(testStuff).round()
     #print(accuracy_score(testlabels, y_pred))
     #score = accuracy_score()
-  #  model.save("my_model.hl5")
+    model.save("my_model.hl5")
 
