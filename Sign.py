@@ -95,9 +95,18 @@ def summarize_diagnostics(history):
 	plt.close()
 
 
-def testModel(gray):
+def testModel():
     model = load_model("my_model.hl5")
-    
+    cap = cv2.VideoCapture(0)
+    print("Hello!, We'll give you 5 seconds to hold n ASL character before taking a picture.")
+    sleep(5)
+
+    _, frame = cap.read()
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    cv2.waitKey(0)
+    cropped = gray[0:480, 150:420].copy()
+    cropped = cv2.resize(cropped, (28, 28), interpolation=cv2.INTER_AREA)
+    frame = img_to_array(cropped)
     #Quick evaluation.
     #datagen = ImageDataGenerator()
     #datagen.fit(x_test)
@@ -106,7 +115,7 @@ def testModel(gray):
 
     #pic = input("Give me the extension:")
     #img = load_img("Ctrue.png", color_mode="grayscale", target_size=(28, 28)) - Direct predictions (load image directly)
-    img = img_to_array(gray)
+    img = img_to_array(frame)
     img = img.flatten()
 
     #img = np.reshape(img, (-1, 28, 28, 1)) - Load me for predicting
@@ -116,12 +125,16 @@ def testModel(gray):
     #plt.show()
 
     img = img/255.0 # Normalizes the img
-    
-    test = model.predict_classes(img)
-    print(test)
-    #for i in range(3):
-    #test_test = model.predict_proba(img)[0]
-    #test_test = "%.2f" % (test_test[test]*100)
+    maxAcc = 0.00
+    maxIndex = 0
+    pred = model.predict_classes(img)
+    for i in range(len(test)):
+        prob = model.predict_proba(img)[0]
+        prob = "%.2f" % (prob[pred[i]]*100)
+        if(maxAcc < prob):
+            maxAcc = prob
+            maxIndex = i
+    print(pred[i])
     #print(test_test)
     
 
@@ -143,12 +156,12 @@ if __name__ == "__main__":
    
     choice = int(input("0 for Prediction Webcam, anything else for Compiling the Model: "))
     if(choice == 0):
-        testModel(frame)
+        testModel()
     else:
         model = defineModel()
-        history =  model.fit(x_train, y_train, validation_data = (x_test, y_test), epochs=30, verbose=1, batch_size=128)
-        x_train2 = np.array(x_train, copy=True)
-        y_train2 = np.array(y_train, copy=True)
+        #history =  model.fit(x_train, y_train, validation_data = (x_test, y_test), epochs=30, verbose=1, batch_size=128)
+        #x_train2 = np.array(x_train, copy=True)
+        #y_train2 = np.array(y_train, copy=True)
 
         datagen = ImageDataGenerator(featurewise_center=False, 
                                      samplewise_center=False,
