@@ -97,7 +97,7 @@ def summarize_diagnostics(history):
 
 def testModel():
     model = load_model("my_model.hl5")
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
     print("Hello!, We'll give you 5 seconds to hold n ASL character before taking a picture.")
     sleep(5)
 
@@ -118,7 +118,7 @@ def testModel():
     img = img_to_array(frame)
     img = img.flatten()
 
-    #img = np.reshape(img, (-1, 28, 28, 1)) - Load me for predicting
+    img = np.reshape(img, (-1, 28, 28, 1)) #- Load me for predicting
 
     #img = np.reshape(img, (28, 28)) - Load me for showing the iamge
     #plt.imshow(img)
@@ -128,13 +128,15 @@ def testModel():
     maxAcc = 0.00
     maxIndex = 0
     pred = model.predict_classes(img)
-    for i in range(len(test)):
+    for i in range(len(pred)):
         prob = model.predict_proba(img)[0]
-        prob = "%.2f" % (prob[pred[i]]*100)
+        prob = (prob[pred[i]]*100)
         if(maxAcc < prob):
             maxAcc = prob
             maxIndex = i
     print(pred[i])
+    #cv2.release()
+    cv2.destroyAllWindows()
     #print(test_test)
     
 
@@ -182,7 +184,7 @@ if __name__ == "__main__":
         history = model.fit_generator(datagen.flow(x_train, y_train, batch_size=32), steps_per_epoch=len(x_train)/32, validation_data=(x_test, y_test), verbose=1, epochs=20)
        
         summarize_diagnostics(history)
-         model.save("my_model.hl5")
+        model.save("my_model.hl5")
         
 
 
