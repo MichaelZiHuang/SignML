@@ -160,6 +160,56 @@ Feel free to run that plt.show() code, our magical sign turns into this
 Literally a blank screen, I mean LITERALLY a blank screen, how the heck should I expect my model to solve that? Tomorrow's woes, tomorrow's woes.
 
 
+<h1>Day 4</h1>
+Back at it again. I've finished the project for now. It sports a 90% accuracy for the Kaggle Dataset, it struggles with live imagery, this is an overfitting issue. 
+<pre><code>
+ datagen = ImageDataGenerator(featurewise_center=False, 
+                                     samplewise_center=False,
+                                     featurewise_std_normalization=False, 
+                                     samplewise_std_normalization=False,
+                                     zca_whitening=False, 
+                                     width_shift_range=0.1,
+                                     height_shift_range=0.1,
+                                     horizontal_flip=True,
+                                     #vertical_flip=True, 
+                                     rotation_range=10)
+        datagen.fit(x_train)
+
+        datagenTest = ImageDataGenerator()
+        datagen.fit(x_test)
+
+        model = defineModel()
+        history = model.fit_generator(datagen.flow(x_train, y_train, batch_size=32), steps_per_epoch=len(x_train)/32, validation_data=(x_test, y_test), verbose=1, epochs=20)
+</pre></code>
+I decided to do some data augmentation, this required that I use generators rather than normal fits. The important ones are the width/height shifts and the rotation. The shape of the sign itself is important. This aided somewhat with the overfitting, but it was still strongly apparent. 
+
+<pre><code>
+    model.add(Conv2D(32, (3, 3), input_shape=(x_test.shape[1:]), activation='relu', padding='same', activity_regularizer=l2(0.001)))
+</pre></code>
+
+An interesting line. This adds "activity regulation", this penalises the layer and tries to take away even more overfitting. Perhaps in the near future I should add more of these as well as dropout layers. This overfitting issue is very important, we need to simultaneously have strong feature processing while also being able to differentiate between all objects. 
+
+<pre><code>
+ _, frame = cap.read()
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    cv2.waitKey(0)
+    cropped = gray[0:480, 150:420].copy()
+    cropped = cv2.resize(cropped, (28, 28), interpolation=cv2.INTER_AREA)
+    frame = img_to_array(cropped)
+</pre></code>
+
+Here's the webcam portion. It's the most basic usage of the OpenCV library, taking a single frame, cropping to have the center of that picture (trying to reduce noise), then running it through our prediction. 
+
+<h1>Conclusion</h1>
+This was a very interesting, yet somewhat frustrating project. Handling overfitting was the main issue of this project, understanding why I needed to implement data augmentation and regularization while also messing with my model's complexity. It was a lot and truth be told, I do want to expand on this.
+
+<h1>If I were to expand...</h1>
+<ul>
+    <li> Reduce overfitting (more regularization, increase model complexity for more feature scanning)
+    <li> Use another dataset instead of Kaggle for more confirmation
+    <li> Refactor camera design, making it more user friendly
+</ul>
+
 Sources:
 https://towardsdatascience.com/train-test-split-and-cross-validation-in-python-80b61beca4b6
 https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html
